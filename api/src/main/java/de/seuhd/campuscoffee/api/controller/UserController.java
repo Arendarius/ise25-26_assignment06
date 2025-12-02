@@ -104,12 +104,12 @@ public class UserController {
             @RequestParam("name") String name) {
 
         return ResponseEntity.ok(
-                posDtoMapper.fromDomain(posService.getByName(name))
+                userDtoMapper.fromDomain(userService.getByName(name))
         );
     }
 
     @Operation(
-            summary = "Create a new POS.",
+            summary = "Create a new User.",
             responses = {
                     @ApiResponse(
                             responseCode = "201",
@@ -117,7 +117,7 @@ public class UserController {
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = PosDto.class)
                             ),
-                            description = "The new POS as a JSON object."
+                            description = "The new User as a JSON object."
                     ),
                     @ApiResponse(
                             responseCode = "400",
@@ -129,45 +129,15 @@ public class UserController {
                     )
             }
     )
-    @PostMapping("")
-    public ResponseEntity<PosDto> create(
-            @RequestBody @Valid PosDto posDto) {
+    @PostMapping("/user")
+    public ResponseEntity<UserDto> create(
+            @RequestBody @Valid UserDto userDto) {
 
-        PosDto created = upsert(posDto);
+        UserDto created = upsert(UserDto);
         return ResponseEntity
                 .created(getLocation(created.id()))
                 .body(created);
     }
-
-    @Operation(
-            summary = "Import a new POS from an OpenStreetMap node.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "201",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = PosDto.class)
-                            ),
-                            description = "The new POS imported from OSM as a JSON object."
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            ),
-                            description = "Validation failed or the OSM node data is invalid."
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = ErrorResponse.class)
-                            ),
-                            description = "The OSM node with the provided ID could not be found."
-                    )
-            }
-    )
     @PostMapping("/import/osm/{nodeId}")
     public ResponseEntity<PosDto> create(
             @PathVariable Long nodeId,
@@ -182,15 +152,15 @@ public class UserController {
     }
 
     @Operation(
-            summary = "Update an existing POS by ID.",
+            summary = "Update an existing User by ID.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = PosDto.class)
+                                    schema = @Schema(implementation = UserDto.class)
                             ),
-                            description = "The updated POS as a JSON object."
+                            description = "The updated User as a JSON object."
                     ),
                     @ApiResponse(
                             responseCode = "400",
@@ -206,29 +176,29 @@ public class UserController {
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponse.class)
                             ),
-                            description = "No POS with the provided ID could be found."
+                            description = "No User with the provided ID could be found."
                     )
             }
     )
     @PutMapping("/{id}")
-    public ResponseEntity<PosDto> update(
+    public ResponseEntity<UserDto> update(
             @PathVariable Long id,
-            @RequestBody @Valid PosDto posDto) {
+            @RequestBody @Valid UserDto userDto) {
 
-        if (!id.equals(posDto.id())) {
-            throw new IllegalArgumentException("POS ID in path and body do not match.");
+        if (!id.equals(userDto.id())) {
+            throw new IllegalArgumentException("User ID in path and body do not match.");
         }
         return ResponseEntity.ok(
-                upsert(posDto)
+                upsert(userDto)
         );
     }
 
     @Operation(
-            summary = "Delete a POS by ID.",
+            summary = "Delete a User by ID.",
             responses = {
                     @ApiResponse(
                             responseCode = "204",
-                            description = "The POS was successfully deleted."
+                            description = "The User was successfully deleted."
                     ),
                     @ApiResponse(
                             responseCode = "404",
@@ -236,27 +206,27 @@ public class UserController {
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = ErrorResponse.class)
                             ),
-                            description = "No POS with the provided ID could be found."
+                            description = "No User with the provided ID could be found."
                     )
             }
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id) {
-        posService.delete(id); // throws NotFoundException if no POS with the provided ID exists
+        userService.delete(id); // throws NotFoundException if no POS with the provided ID exists
         return ResponseEntity.noContent().build();
     }
 
     /**
      * Common upsert logic for create and update.
      *
-     * @param posDto the POS DTO to map and upsert
+     * @param userDto the POS DTO to map and upsert
      * @return the upserted POS mapped back to the DTO format.
      */
-    private PosDto upsert(PosDto posDto) {
-        return posDtoMapper.fromDomain(
-                posService.upsert(
-                        posDtoMapper.toDomain(posDto)
+    private UserDto upsert(UserDto userDto) {
+        return userDtoMapper.fromDomain(
+                userService.upsert(
+                        userDtoMapper.toDomain(userDto)
                 )
         );
     }
